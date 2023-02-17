@@ -541,6 +541,30 @@ any '/rule/show' => sub {
 	     table => $table);
 } => 'rule_show';
 
+
+=item get /reftools
+
+This is a static page that shows dropdowns and buttons to generate various items
+from the Etinerra tables.
+
+B<input> is your source text. This is no longer a map. B<url> is the URL to an
+external table, B<table> is the text of the table if you want to paste it. See
+C</describe/text> below if you want to display the result instead of allow the
+user to edit the form.
+
+=cut
+
+get '/reftools' => sub {
+  my $c = shift;
+  my $input = $c->param('input') || '';
+  my $url = $c->param('url');
+  my $table = $c->param('table');
+  my $seed = $c->param('seed') || time;
+  srand($c->param('seed')) if $c->param('seed');
+  my $descriptions = $c->param('descriptions') || '';
+  $c->render(template => 'reftools', input => $input, url => $url, table => $table, seed => $seed, descriptions => $descriptions);
+};
+
 =item any /describe/text
 
 This is where the text input is rendered. B<input> is the text, B<url> is the
@@ -566,11 +590,15 @@ any '/describe/text' => sub {
   my $seed = $c->param('seed');
   srand($seed) if $seed;
   my $data = get_table($c); # must be scalar context
-  $c->render(template => 'text', input => $input, load => $load, seed => $seed,
-	     n => $n, url => $url, table => $table,
-	     rule => $rule, id => to_id($rule),
-	     log => $c->param('log') ? $log->history : undef,
-	     descriptions => describe_text($input, parse_table($data)));
+  if ($c->param('goback')){
+	  $c->render(template => 'reftools', input => $input, url => $url, table => $table, seed => int(rand(1000000000)), descriptions => describe_text($input, parse_table($data)));
+  } else {	  
+	  $c->render(template => 'text', input => $input, load => $load, seed => $seed,
+			 n => $n, url => $url, table => $table,
+			 rule => $rule, id => to_id($rule),
+			 log => $c->param('log') ? $log->history : undef,
+			 descriptions => describe_text($input, parse_table($data)));
+  }
 };
 
 =item get /default/map
@@ -639,15 +667,15 @@ get '/traveller/table' => sub {
   $c->render(text => load_table('traveller', app->config('contrib')), format => 'txt');
 };
 
-=item get /rorschachhamster/table
+=item get /etinerra/table
 
-Für die deutschen Tabellen von Rorschachhamster Alex Schroeder.
+The Etinerra tables by Michael Shorten for personal use
 
 =cut
 
-get '/rorschachhamster/table' => sub {
+get 'etinerra/table' => sub {
   my $c = shift;
-  $c->render(text => load_table('rorschachhamster', app->config('contrib')), format => 'txt');
+  $c->render(text => load_table('etinerra', app->config('contrib')), format => 'txt');
 };
 
 =item get /source
@@ -1826,11 +1854,6 @@ include https://campaignwiki.org/contrib/gnomeyland.txt
 1,gorgon
 1,cryo-hydra
 % end
-
-<p>
-In addition to that, the "hex" key with the current coordinates is always
-available as a local. <code>[same hex]</code> returns something like "0101".
-</p>
 
 <h2 id="alias">Alias: as</h2>
 
