@@ -6,7 +6,8 @@ added functionality to support a "Referee's Tools" page, where I can
 click buttons and generate results from my Etinerra tables for use at
 the table. So, having the best of both worlds - generating the 
 contents of my world a hex at a time, and generating content as needed
-at the table. - Michael S / chgowiz - 2/17/23
+at the table. 
+- Michael S / chgowiz - 2/17/23
 
 -- Original README follows --
 
